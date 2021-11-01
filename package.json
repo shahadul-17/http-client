@@ -1,0 +1,38 @@
+{
+  "name": "@shahadul-17/http-client",
+  "version": "0.0.1",
+  "description": "A lightweight and robust client for sending HTTP requests and receiving HTTP responses from a resource identified by a URL.",
+  "author": "Md. Shahadul Alam Patwary",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "tsc --build --clean",
+    "build": "tsc --build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shahadul-17/http-client.git"
+  },
+  "keywords": [
+    "http",
+    "client",
+    "fetch",
+    "XMLHttpRequest",
+    "request",
+    "xhr"
+  ],
+  "bugs": {
+    "url": "https://github.com/shahadul-17/http-client/issues"
+  },
+  "homepage": "https://github.com/shahadul-17/http-client#readme",
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "@shahadul-17/event-manager": "^0.0.4"
+  }
+}
