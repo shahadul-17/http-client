@@ -282,10 +282,6 @@ export class HttpWebRequest<EventType extends string = HttpEvent,
       });
 
       _xmlHttpRequest.addEventListener("readystatechange", function (event): any {
-        // this allows error listener resolve the promise. because,
-        // error listener is executed after ready state change listener...
-        if (_xmlHttpRequest.status === 0) { return undefined; }
-
         // parses text based contents (e.g. HTML, JSON etc.)...
         const httpResponse: undefined | IHttpResponse = context._parseContent() ? {
           status: this.status,
@@ -297,7 +293,9 @@ export class HttpWebRequest<EventType extends string = HttpEvent,
 
         context._handleDownloadProgressEvent(event, httpResponse);
 
-        httpResponse && resolve(httpResponse);
+        // this allows error listener resolve the promise. because,
+        // error listener is executed after ready state change listener...
+        httpResponse && _xmlHttpRequest.status !== 0 && resolve(httpResponse);
 
         return undefined;
       });
