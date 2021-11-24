@@ -217,7 +217,9 @@ export class HttpUtilities {
 
     for (const formField of formFields) {
       const formFieldInfo = this.extractParameterInfo(formField);
-      const value = DataUtilities.getValue(formFieldInfo.name, data);
+      // 'single' flag is set to 'false' because form data may contain multiple
+      // values with identical names...
+      const value = DataUtilities.getValue(formFieldInfo.name, data, false);
 
       // we could've simply checked 'if (!value)' but this will
       // also remove empty strings...
@@ -230,7 +232,15 @@ export class HttpUtilities {
         continue;
       }
 
-      formData.append(formFieldInfo.name, value);
+      // if value is an array, we'll append all the elements...
+      if (Array.isArray(value)) {
+        for (const element of value) {
+          formData.append(formFieldInfo.name, element);
+        }
+      } else {
+        // otherwise we'll append the single element...
+        formData.append(formFieldInfo.name, value);
+      }
     }
 
     return formData;

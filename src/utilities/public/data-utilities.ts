@@ -1,20 +1,40 @@
 export class DataUtilities {
 
   static getValue(propertyName: string,
-    data?: Record<string, any> | FormData): any {
+    data?: Record<string, any> | FormData,
+    single = true): any {
     if (!data) { return undefined; }
 
-    return data instanceof FormData ?
-      data.get(propertyName) : data[propertyName];
+    // checks if data is an instance of FormData...
+    if (data instanceof FormData) {
+      const value = data.getAll(propertyName);
+
+      // for empty array we'll return 'undefined'...
+      if (value.length === 0) { return undefined; }
+      // if the array contains a single value,
+      // or 'single' flag is 'true', returns the
+      // first element of the array...
+      else if (single || value.length === 1) { return value[0]; }
+
+      // otherwise returns the array...
+      return value;
+    }
+
+    return data[propertyName];
   }
 
   static setValue(propertyName: string, value: any,
-    data?: Record<string, any> | FormData)
+    data?: Record<string, any> | FormData,
+    overwrite = false)
     : Record<string, any> | FormData {
     if (!data) { data = {}; }
 
     if (data instanceof FormData) {
-      data.set(propertyName, value);
+      if (overwrite) {
+        data.set(propertyName, value);
+      } else {
+        data.append(propertyName, value);
+      }
     } else {
       data[propertyName] = value;
     }
