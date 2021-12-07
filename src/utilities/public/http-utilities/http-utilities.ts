@@ -35,15 +35,11 @@ export class HttpUtilities {
    * Otherwise returns the original parameter name.
    */
   static extractArrayTypeParameterName(parameter: string): string {
-    const lastIndexOfClosingSquareBracket = parameter.lastIndexOf("]");
+    const lastIndexOfSquareBrackets = parameter.lastIndexOf("[]");
 
-    if (lastIndexOfClosingSquareBracket === -1 || lastIndexOfClosingSquareBracket !== parameter.length - 1) { return parameter; }
+    if (lastIndexOfSquareBrackets === -1 || lastIndexOfSquareBrackets !== parameter.length - 2) { return parameter; }
 
-    const lastIndexOfOpeningSquareBracket = parameter.lastIndexOf("[");
-
-    if (lastIndexOfOpeningSquareBracket === -1) { return parameter; }
-
-    const parameterName = parameter.substring(lastIndexOfOpeningSquareBracket);
+    const parameterName = parameter.substring(0, lastIndexOfSquareBrackets);
 
     return parameterName;
   }
