@@ -27,6 +27,28 @@ export class HttpUtilities {
   }
 
   /**
+   * Checks if a parameter is an array. If the parameter is an array,
+   * it will extract parameter name. Otherwise, it will return the original
+   * parameter name without modification.
+   * @param parameter Parameter to check.
+   * @returns Returns extracted parameter name if the parameter is an array.
+   * Otherwise returns the original parameter name.
+   */
+  static extractArrayTypeParameterName(parameter: string): string {
+    const lastIndexOfClosingSquareBracket = parameter.lastIndexOf("]");
+
+    if (lastIndexOfClosingSquareBracket === -1 || lastIndexOfClosingSquareBracket !== parameter.length - 1) { return parameter; }
+
+    const lastIndexOfOpeningSquareBracket = parameter.lastIndexOf("[");
+
+    if (lastIndexOfOpeningSquareBracket === -1) { return parameter; }
+
+    const parameterName = parameter.substring(lastIndexOfOpeningSquareBracket);
+
+    return parameterName;
+  }
+
+  /**
    * Extracts information of a parameter.
    * @param parameter Parameter of which, information should be extracted.
    * @returns Returns parameter information.
@@ -43,9 +65,12 @@ export class HttpUtilities {
       parameter = parameter.substring(0, indexOfQuestionMark);
     }
 
+    const _parameter = this.extractArrayTypeParameterName(parameter);
+
     return {
       isMandatory: isMandatory,
-      name: parameter
+      name: _parameter,
+      isArray: parameter !== _parameter,
     };
   }
 
@@ -214,9 +239,20 @@ export class HttpUtilities {
     if (!formFields || formFields.length === 0 || !data) { return undefined; }
 
     const formData = new FormData();
+    const formDataKeys = data instanceof FormData ?
+      DataUtilities.getIterableIteratorToArray(data.keys()) : [];
+    const arrayTypeParameterInfos = [];
 
     for (const formField of formFields) {
       const formFieldInfo = this.extractParameterInfo(formField);
+
+      // if current field is an array, we'll push that to 'arrayTypeParameters' list...
+      if (formFieldInfo.isArray) {
+        arrayTypeParameterInfos.push(formFieldInfo);
+
+        continue;
+      }
+
       // 'single' flag is set to 'false' because form data may contain multiple
       // values with identical names...
       const value = DataUtilities.getValue(formFieldInfo.name, data, false);
@@ -240,6 +276,34 @@ export class HttpUtilities {
       } else {
         // otherwise we'll append the single element...
         formData.append(formFieldInfo.name, value);
+      }
+    }
+
+    // this portion of code handles array type form fields...
+    for (const arrayTypeParameterInfo of arrayTypeParameterInfos) {
+      const formDataArrayEntryKeys = DataUtilities.findFormDataArrayEntryKeys(
+        arrayTypeParameterInfo.name, formDataKeys);
+
+      // if no keys were found and the parameter is mandatory, we'll throw error...
+      if (arrayTypeParameterInfo.isMandatory && formDataArrayEntryKeys.length === 0) {
+        throw new HttpError(400, `Mandatory field '${arrayTypeParameterInfo.name}' not provided.`,
+          undefined, { parameter: arrayTypeParameterInfo.name, location: "FORM" });
+      }
+
+      for (const key of formDataArrayEntryKeys) {
+        // 'single' flag is set to 'false' because form data may contain multiple
+        // values with identical names...
+        const value = DataUtilities.getValue(key, data, false);
+
+        // if value is an array, we'll append all the elements...
+        if (Array.isArray(value)) {
+          for (const element of value) {
+            formData.append(key, element);
+          }
+        } else {
+          // otherwise we'll append the single element...
+          formData.append(key, value);
+        }
       }
     }
 
