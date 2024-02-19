@@ -18,6 +18,13 @@ export interface IHttpRequestOptions {
    */
   automaticJsonResponseBodyParsing?: boolean;
   /**
+   * Indicates whether or not cross-site Access-Control requests
+   * should be made using credentials such as cookies,
+   * authorization headers or TLS client certificates. Setting
+   * this value has no effect on same-origin requests.
+   */
+  allowCredentialsOnCrossSiteRequests?: boolean;
+  /**
    * (Optional) HTTP request method. e.g. "GET", "POST" etc.
    * Default value is "GET".
    */

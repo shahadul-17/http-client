@@ -1,6 +1,6 @@
 {
   "name": "@shahadul-17/http-client",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A lightweight and robust client for sending HTTP requests and receiving HTTP responses from a resource identified by a URL.",
   "author": "Md. Shahadul Alam Patwary",
   "license": "MIT",
@@ -29,10 +29,11 @@
     "url": "https://github.com/shahadul-17/http-client/issues"
   },
   "homepage": "https://github.com/shahadul-17/http-client#readme",
-  "devDependencies": {
-    "typescript": "^4.4.4"
-  },
   "dependencies": {
-    "@shahadul-17/event-manager": "^0.0.4"
+    "@shahadul-17/event-manager": "^0.0.4",
+    "@shahadul-17/utilities": "^0.0.16"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
   }
 }

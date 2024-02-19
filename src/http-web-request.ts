@@ -1,9 +1,10 @@
 import { EventManager } from "@shahadul-17/event-manager";
+import { StringUtilities } from "@shahadul-17/utilities";
 import {
   HttpEvent, HttpRequestState, IHttpRequestOptions,
   IHttpResponse, XmlHttpRequestBody, IHttpEventArguments,
 } from "./http";
-import { MathUtilities, ObjectUtilities, StringUtilities } from "./utilities";
+import { MathUtilities, ObjectUtilities } from "./utilities";
 import { IHttpWebRequest } from "./http-web-request.i";
 
 const HTTP_CONTENT_TYPE_HEADER = "content-type";
@@ -164,7 +165,7 @@ export class HttpWebRequest<EventType extends string = HttpEvent,
 
     // checks content type for textual content...
     if (isJsonContent || contentType.includes("TEXT")) {
-      this._textData = StringUtilities.fromArrayBuffer(this._xmlHttpRequest.response);
+      this._textData = StringUtilities.fromBytes(this._xmlHttpRequest.response);
 
       // if content type is JSON and automatic parsing is enabled...
       if (isJsonContent && this.options.automaticJsonResponseBodyParsing) {
@@ -243,6 +244,7 @@ export class HttpWebRequest<EventType extends string = HttpEvent,
       _xmlHttpRequest.open(options.method ?? "GET", options.url, true);
       _xmlHttpRequest.timeout = options.timeout ?? 0;
       _xmlHttpRequest.responseType = "arraybuffer";
+      _xmlHttpRequest.withCredentials = options.allowCredentialsOnCrossSiteRequests ?? false;
 
       // adding headers...
       for (const headerName in _requestHeaders) {
