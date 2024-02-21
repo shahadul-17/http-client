@@ -1,6 +1,6 @@
 {
   "name": "@shahadul-17/http-client",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A lightweight and robust client for sending HTTP requests and receiving HTTP responses from a resource identified by a URL.",
   "author": "Md. Shahadul Alam Patwary",
   "license": "MIT",

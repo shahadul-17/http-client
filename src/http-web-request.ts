@@ -32,6 +32,7 @@ export class HttpWebRequest<EventType extends string = HttpEvent,
 
   private _textData?: string;
   private _jsonData?: Record<string, any>;
+  private _responseHeaders?: Record<string, undefined | string | Array<string>> = undefined;
 
   private readonly _options: IHttpRequestOptions;
   private readonly _xmlHttpRequest: XMLHttpRequest;
@@ -176,6 +177,50 @@ export class HttpWebRequest<EventType extends string = HttpEvent,
     return true;
   }
 
+  private _parseResponseHeaders(): undefined | Record<string, undefined | string | Array<string>> {
+    if (typeof this._responseHeaders !== 'undefined') { return this._responseHeaders; }
+    if (this._xmlHttpRequest.readyState < 2) { return undefined; }      // this._xmlHttpRequest.HEADERS_RECEIVED = 2...
+
+    const responseHeadersAsString = this._xmlHttpRequest.getAllResponseHeaders();
+    const responseHeadersAsArray = responseHeadersAsString.trim().split(/[\r\n]+/);
+    const responseHeaders: Record<string, undefined | string | Array<string>> = {};
+
+    for (const responseHeader of responseHeadersAsArray) {
+      const indexOfColon = responseHeader.indexOf(':');
+
+      if (indexOfColon === -1) { continue; }
+
+      const headerName = responseHeader.substring(0, indexOfColon);
+      const headerValue = responseHeader.substring(indexOfColon + 1).trim();
+      const previousHeaderValue = responseHeaders[headerName];
+
+      // if no previous header value exists for the header name...
+      if (typeof previousHeaderValue === 'undefined') {
+        // we shall assign the header value to the headers...
+        responseHeaders[headerName] = headerValue;
+
+        continue;
+      }
+
+      // if previous header value exists for the header name and previous value is an array...
+      if (Array.isArray(previousHeaderValue)) {
+        // we shall push the header value to the headers...
+        previousHeaderValue.push(headerValue);
+
+        continue;
+      }
+
+      // otherwise, if the previous header value is a string,
+      // we shall create a new array and assign that array
+      // to the corresponding header name...
+      responseHeaders[headerName] = [ previousHeaderValue, headerValue, ];
+    }
+
+    this._responseHeaders = responseHeaders;
+
+    return this._responseHeaders;
+  }
+
   private _handleUploadProgressEvent(event: ProgressEvent<XMLHttpRequestEventTarget>): any {
     const httpEventType = HttpWebRequest._eventTypeMaps.uploadEventTypeMap[event.type];
 
@@ -291,6 +336,7 @@ export class HttpWebRequest<EventType extends string = HttpEvent,
           textData: context._textData,
           jsonData: context._jsonData,
           requestOptions: options,
+          headers: context._parseResponseHeaders(),
         } : undefined;
 
         context._handleDownloadProgressEvent(event, httpResponse);
